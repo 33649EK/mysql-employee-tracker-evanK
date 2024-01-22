@@ -15,56 +15,7 @@ const connection = mysql.createConnection({
 
 connection.connect(err => {
     if (err) throw err;
-    // console.log('connected as id ' + connection.threadId);
-    // connection.end();
 });
-
-// checkDepartment = () => {
-//     return new Promise((resolve, reject) => {
-//         connection.query('SELECT * FROM departments', (err, results) => {
-//             if (err) reject(err);
-//             // let departmentArray = []
-//             // for (let i = 0; i < results.length; i++) {
-//             //     departmentArray.push(results[i].name)
-//             // }
-//             let departmentArray = results.map(({ name }) => name)
-//             // console.log(departmentArray)
-//             resolve(departmentArray)
-//         })
-//     })
-// }
-
-// checkRole = () => {
-//     return new Promise((resolve, reject) => {
-//         connection.query('SELECT * FROM roles', (err, results) => {
-//             if (err) reject(err);
-//             // let roleArray = [];
-//             // for (let i = 0; i < results.length; i++) {
-//             //     console.log(results[i].title);
-//             //     roleArray.push(results[i].title);
-//             // }
-//             let roleArray = results.map(({ title }) => title)
-//             // console.log(roleArray);
-//             resolve(roleArray);
-//         });
-//     });
-// };
-
-// checkEmployee = () => {
-//     return new Promise((resolve, reject) => {
-//         connection.query('SELECT * FROM employees', (err, results) => {
-//             if (err) reject(err);
-//             // let employeeArray = [];
-//             // for (let i = 0; i < results.length; i++) {
-//             //     console.log(results[i].first_name + ' ' + results[i].last_name);
-//             //     employeeArray.push(results[i].first_name + ' ' + results[i].last_name);
-//             // }
-//             let employeeArray = results.map(({ first_name, last_name }) => first_name + ' ' + last_name)
-//             // console.log(employeeArray);
-//             resolve(employeeArray);
-//         });
-//     });
-// };
 
 checkTable = (table) => {
     return new Promise((resolve, reject) => {
@@ -90,10 +41,6 @@ checkTable = (table) => {
 
 async function startPrompt() {
 
-    // let departments = await checkDepartment()
-    // let roles = await checkRole()
-    // let employee = await checkEmployee()
-
     let departments = await checkTable('departments')
     let roles = await checkTable('roles')
     let employee = await checkTable('employees')
@@ -114,7 +61,6 @@ async function startPrompt() {
                         console.table(results)
                         startPrompt()
                     })
-                    // connection.end()
                     break;
 
                 case 'View all roles':
@@ -123,7 +69,6 @@ async function startPrompt() {
                         console.table(results)
                         startPrompt()
                     })
-                    // connection.end()
                     break;
 
                 case 'View all employees':
@@ -132,7 +77,6 @@ async function startPrompt() {
                         console.table(results)
                         startPrompt()
                     })
-                    // connection.end()
                     break;
 
                 case 'Add a department':
@@ -149,7 +93,6 @@ async function startPrompt() {
                                     console.log(res.affectedRows + ' department inserted!\n');
                                 }
                             );
-                            // connection.end()
                             startPrompt()
                         })
                     break;
@@ -170,8 +113,6 @@ async function startPrompt() {
                         .then((answers) => {
                             // console.log(answers)
                             insertEmployee(answers);
-                            // connection.end()
-                            // startPrompt()
                         })
                     break;
 
@@ -208,7 +149,6 @@ async function insertRole(answers) {
             console.log(res.affectedRows + ' role inserted!\n');
         }
     );
-    // connection.end()
     startPrompt()
 }
 
