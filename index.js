@@ -1,7 +1,11 @@
 const inquirer = require('inquirer')
 const mysql = require('mysql2')
-const UserPrompts = require('./helperPrompts/inquirerPrompts')
+var { AsciiTable3 } = require('ascii-table3');
+const UserPrompts = require('./classes/inquirerPrompts')
 const userPrompts = new UserPrompts()
+const MysqlQueries = require('./classes/queries')
+const query = new MysqlQueries()
+
 
 const connection = mysql.createConnection({
     host: 'localhost',
@@ -16,52 +20,52 @@ connection.connect(err => {
     // connection.end();
 });
 
-checkDepartment = () => {
-    return new Promise((resolve, reject) => {
-        connection.query('SELECT * FROM departments', (err, results) => {
-            if (err) reject(err);
-            // let departmentArray = []
-            // for (let i = 0; i < results.length; i++) {
-            //     departmentArray.push(results[i].name)
-            // }
-            let departmentArray = results.map(({ name }) => name)
-            // console.log(departmentArray)
-            resolve(departmentArray)
-        })
-    })
-}
+// checkDepartment = () => {
+//     return new Promise((resolve, reject) => {
+//         connection.query('SELECT * FROM departments', (err, results) => {
+//             if (err) reject(err);
+//             // let departmentArray = []
+//             // for (let i = 0; i < results.length; i++) {
+//             //     departmentArray.push(results[i].name)
+//             // }
+//             let departmentArray = results.map(({ name }) => name)
+//             // console.log(departmentArray)
+//             resolve(departmentArray)
+//         })
+//     })
+// }
 
-checkRole = () => {
-    return new Promise((resolve, reject) => {
-        connection.query('SELECT * FROM roles', (err, results) => {
-            if (err) reject(err);
-            // let roleArray = [];
-            // for (let i = 0; i < results.length; i++) {
-            //     console.log(results[i].title);
-            //     roleArray.push(results[i].title);
-            // }
-            let roleArray = results.map(({ title }) => title)
-            // console.log(roleArray);
-            resolve(roleArray);
-        });
-    });
-};
+// checkRole = () => {
+//     return new Promise((resolve, reject) => {
+//         connection.query('SELECT * FROM roles', (err, results) => {
+//             if (err) reject(err);
+//             // let roleArray = [];
+//             // for (let i = 0; i < results.length; i++) {
+//             //     console.log(results[i].title);
+//             //     roleArray.push(results[i].title);
+//             // }
+//             let roleArray = results.map(({ title }) => title)
+//             // console.log(roleArray);
+//             resolve(roleArray);
+//         });
+//     });
+// };
 
-checkEmployee = () => {
-    return new Promise((resolve, reject) => {
-        connection.query('SELECT * FROM employees', (err, results) => {
-            if (err) reject(err);
-            // let employeeArray = [];
-            // for (let i = 0; i < results.length; i++) {
-            //     console.log(results[i].first_name + ' ' + results[i].last_name);
-            //     employeeArray.push(results[i].first_name + ' ' + results[i].last_name);
-            // }
-            let employeeArray = results.map(({ first_name, last_name }) => first_name + ' ' + last_name)
-            // console.log(employeeArray);
-            resolve(employeeArray);
-        });
-    });
-};
+// checkEmployee = () => {
+//     return new Promise((resolve, reject) => {
+//         connection.query('SELECT * FROM employees', (err, results) => {
+//             if (err) reject(err);
+//             // let employeeArray = [];
+//             // for (let i = 0; i < results.length; i++) {
+//             //     console.log(results[i].first_name + ' ' + results[i].last_name);
+//             //     employeeArray.push(results[i].first_name + ' ' + results[i].last_name);
+//             // }
+//             let employeeArray = results.map(({ first_name, last_name }) => first_name + ' ' + last_name)
+//             // console.log(employeeArray);
+//             resolve(employeeArray);
+//         });
+//     });
+// };
 
 checkTable = (table) => {
     return new Promise((resolve, reject) => {
@@ -95,7 +99,7 @@ async function startPrompt() {
     let roles = await checkTable('roles')
     let employee = await checkTable('employees')
 
-    console.log(departments, roles, employee)
+    // console.log(departments, roles, employee)
 
 
     inquirer.prompt(userPrompts.initialPrompt)
@@ -106,25 +110,28 @@ async function startPrompt() {
             switch (answer.initialPrompt) {
 
                 case 'View all departments':
-                    connection.query('SELECT * FROM departments', (err, results) => {
+                    connection.query(query.showDepartments, (err, results) => {
                         if (err) throw err;
                         console.table(results)
+                        startPrompt()
                     })
                     // connection.end()
                     break;
 
                 case 'View all roles':
-                    connection.query('SELECT * FROM roles', (err, results) => {
+                    connection.query(query.showRoles, (err, results) => {
                         if (err) throw err;
                         console.table(results)
+                        startPrompt()
                     })
                     // connection.end()
                     break;
 
                 case 'View all employees':
-                    connection.query('SELECT * FROM employees', (err, results) => {
+                    connection.query(query.showEmployees, (err, results) => {
                         if (err) throw err;
                         console.table(results)
+                        startPrompt()
                     })
                     // connection.end()
                     break;
@@ -144,7 +151,7 @@ async function startPrompt() {
                                 }
                             );
                             // connection.end()
-                            // startPrompt()
+                            startPrompt()
                         })
                     break;
 
@@ -159,7 +166,7 @@ async function startPrompt() {
                     break;
 
                 case 'Add an employee':
-                    let employeePrompt = new UserPrompts(roles, '', employee)
+                    let employeePrompt = new UserPrompts(roles, '', ['N/A', ...employee])
                     inquirer.prompt(employeePrompt.addEmployee)
                         .then((answers) => {
                             console.log(answers)
@@ -175,23 +182,7 @@ async function startPrompt() {
                     inquirer.prompt(updatePrompt.updateEmployeeRole)
                         .then((answers) => {
                             console.log(answers)
-                            connection.query(
-                                'UPDATE employees SET ? WHERE ?',
-                                [
-                                    {
-                                        role_id: answers.employeeRole
-                                    },
-                                    {
-                                        first_name: answers.employeeName
-                                    }
-                                ],
-                                function (err, res) {
-                                    if (err) throw err;
-                                    console.log(res.affectedRows + ' employee updated!\n');
-                                }
-                            );
-                            // connection.end()
-                            // startPrompt()
+                            updateEmployeeRole(answers)
                         })
                     break;
             }
@@ -267,17 +258,50 @@ async function insertEmployee(answers) {
             console.log(res.affectedRows + ' employee inserted!\n');
         }
     );
+    startPrompt()
 }
 
 function getEmployeeId(employeeName) {
     return new Promise((resolve, reject) => {
         connection.query('SELECT * FROM employees', (err, results) => {
             if (err) reject(err);
+            // Creates a flag to check if the employee id is found
+            let idFound = false;
             for (let i = 0; i < results.length; i++) {
                 if (results[i].first_name + ' ' + results[i].last_name === employeeName) {
                     resolve(results[i].id)
+                    idFound = true;
+                    break;
                 }
+            }
+            // If the user chooses 'N/A' for manager, then the manager id is set to null
+            if (!idFound) {
+                resolve(null)
             }
         })
     })
+}
+
+
+async function updateEmployeeRole(answers) {
+
+    let roleId = await getRoleId(answers.employeeRole)
+    let employeeId = await getEmployeeId(answers.employeeName)
+
+    connection.query(
+        'UPDATE employees SET ? WHERE ?',
+        [
+            {
+                role_id: roleId
+            },
+            {
+                id: employeeId
+            }
+        ],
+        function (err, res) {
+            if (err) throw err;
+            console.log(answers.employeeName + ' has had their role updated to ' + answers.employeeRole + '!');
+            startPrompt()
+        }
+    )
 }
