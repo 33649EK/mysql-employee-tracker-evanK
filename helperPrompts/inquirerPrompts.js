@@ -58,8 +58,7 @@ class UserPrompts {
                 message: 'Employee manager:',
                 choices: employee
             }
-        ]
-
+        ];
         this.updateEmployeeRole = [
             {
                 type: 'input',
