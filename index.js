@@ -1,6 +1,5 @@
 const inquirer = require('inquirer')
 const mysql = require('mysql2')
-var { AsciiTable3 } = require('ascii-table3');
 const UserPrompts = require('./classes/inquirerPrompts')
 const userPrompts = new UserPrompts()
 const MysqlQueries = require('./classes/queries')
@@ -139,7 +138,7 @@ async function startPrompt() {
                 case 'Add a department':
                     inquirer.prompt(userPrompts.addDepartment)
                         .then((answers) => {
-                            console.log(answers)
+                            // console.log(answers)
                             connection.query(
                                 'INSERT INTO departments SET ?',
                                 {
@@ -160,7 +159,7 @@ async function startPrompt() {
                     let rolePrompt = new UserPrompts('', departments, '')
                     inquirer.prompt(rolePrompt.addRole)
                         .then((answers) => {
-                            console.log(answers)
+                            // console.log(answers)
                             insertRole(answers)
                         })
                     break;
@@ -169,7 +168,7 @@ async function startPrompt() {
                     let employeePrompt = new UserPrompts(roles, '', ['N/A', ...employee])
                     inquirer.prompt(employeePrompt.addEmployee)
                         .then((answers) => {
-                            console.log(answers)
+                            // console.log(answers)
                             insertEmployee(answers);
                             // connection.end()
                             // startPrompt()
@@ -181,7 +180,7 @@ async function startPrompt() {
                     let updatePrompt = new UserPrompts(roles, '', '')
                     inquirer.prompt(updatePrompt.updateEmployeeRole)
                         .then((answers) => {
-                            console.log(answers)
+                            // console.log(answers)
                             updateEmployeeRole(answers)
                         })
                     break;
